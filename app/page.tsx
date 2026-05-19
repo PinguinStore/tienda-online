@@ -3,6 +3,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../src/lib/supabase'
 import { motion } from 'framer-motion'
+import {
+  FaShoppingCart,
+  FaTrash,
+  FaUserShield
+} from 'react-icons/fa'
 
 export default function Home() {
 
@@ -44,10 +49,10 @@ export default function Home() {
       pass === '30012022'
     ) {
       setAdmin(true)
-      alert('Bienvenido')
+      alert('Bienvenido administrador')
     }
     else {
-      alert('Datos incorrectos')
+      alert('Usuario incorrecto')
     }
   }
 
@@ -129,11 +134,11 @@ export default function Home() {
       0
     )
 
-    const phone = '59169580486'
+    const phone = '59170000000'
 
     const url =
       `https://wa.me/${phone}?text=` +
-      `Hola quiero comprar:%0A${text}%0A%0ATotal:$${total}`
+      `Hola,%20quiero%20comprar:%0A${text}%0A%0ATotal:%20$${total}`
 
     window.open(url,'_blank')
   }
@@ -149,40 +154,46 @@ export default function Home() {
 
     <main
       style={{
-        background:
-          'linear-gradient(135deg,#0f172a,#1e293b)',
+        background:'#f3f4f6',
         minHeight:'100vh',
-        color:'white',
-        padding:'20px',
         fontFamily:'Arial'
       }}
     >
 
-      <div
+      <header
         style={{
+          background:'#131921',
+          padding:'15px 30px',
+          color:'white',
           display:'flex',
           justifyContent:'space-between',
           alignItems:'center',
           flexWrap:'wrap',
           gap:'20px',
-          marginBottom:'30px'
+          position:'sticky',
+          top:0,
+          zIndex:1000
         }}
       >
 
-        <div>
+        <div
+          style={{
+            display:'flex',
+            alignItems:'center',
+            gap:'10px'
+          }}
+        >
 
-          <h1
+          <img
+            src='https://cdn-icons-png.flaticon.com/512/3081/3081559.png'
             style={{
-              fontSize:'50px',
-              fontWeight:'bold'
+              width:'50px'
             }}
-          >
+          />
+
+          <h1>
             ALDAIR STORE
           </h1>
-
-          <p>
-            Tienda moderna premium 🚀
-          </p>
 
         </div>
 
@@ -193,33 +204,83 @@ export default function Home() {
             setSearch(e.target.value)
           }
           style={{
-            padding:'15px',
-            borderRadius:'15px',
-            border:'none',
-            width:'300px',
-            fontSize:'16px'
+            width:'400px',
+            maxWidth:'100%',
+            padding:'14px',
+            borderRadius:'10px',
+            border:'none'
           }}
         />
 
-      </div>
+        <div
+          style={{
+            display:'flex',
+            alignItems:'center',
+            gap:'15px'
+          }}
+        >
+
+          <FaShoppingCart size={30} />
+
+          <span>
+            {cart.length}
+          </span>
+
+        </div>
+
+      </header>
+
+      <section
+        style={{
+          background:
+            'linear-gradient(to right,#2563eb,#1e3a8a)',
+          color:'white',
+          padding:'60px 30px',
+          textAlign:'center'
+        }}
+      >
+
+        <motion.h1
+          initial={{ opacity:0,y:-40 }}
+          animate={{ opacity:1,y:0 }}
+          transition={{ duration:0.7 }}
+          style={{
+            fontSize:'55px',
+            marginBottom:'20px'
+          }}
+        >
+          Bienvenido a Aldair Store
+        </motion.h1>
+
+        <p
+          style={{
+            fontSize:'22px'
+          }}
+        >
+          Compra productos increíbles 🚀
+        </p>
+
+      </section>
 
       <div
         style={{
           display:'grid',
           gridTemplateColumns:
             '1fr 320px',
-          gap:'20px'
+          gap:'20px',
+          padding:'20px'
         }}
       >
 
         <div>
 
-          {!admin && (
+          {!admin ? (
 
-            <div style={glass}>
+            <div style={adminBox}>
 
               <h2>
-                Acceso Administrador
+                <FaUserShield />
+                Administrador
               </h2>
 
               <input
@@ -245,16 +306,14 @@ export default function Home() {
                 onClick={loginAdmin}
                 style={button}
               >
-                Entrar
+                Ingresar
               </button>
 
             </div>
 
-          )}
+          ) : (
 
-          {admin && (
-
-            <div style={glass}>
+            <div style={adminBox}>
 
               <h2>
                 Panel Administrador
@@ -320,21 +379,17 @@ export default function Home() {
             {filteredProducts.map((product)=>(
 
               <motion.div
-                whileHover={{
-                  y:-10,
-                  scale:1.03
-                }}
-                transition={{
-                  duration:0.2
-                }}
                 key={product.id}
+                whileHover={{
+                  y:-8,
+                  scale:1.02
+                }}
                 style={{
                   background:'white',
-                  borderRadius:'25px',
+                  borderRadius:'20px',
                   overflow:'hidden',
-                  color:'black',
                   boxShadow:
-                    '0 10px 30px rgba(0,0,0,0.3)'
+                    '0 10px 25px rgba(0,0,0,0.1)'
                 }}
               >
 
@@ -342,7 +397,7 @@ export default function Home() {
                   src={product.image}
                   style={{
                     width:'100%',
-                    height:'230px',
+                    height:'240px',
                     objectFit:'cover'
                   }}
                 />
@@ -365,7 +420,11 @@ export default function Home() {
                     {product.name}
                   </h2>
 
-                  <h3>
+                  <h3
+                    style={{
+                      color:'#2563eb'
+                    }}
+                  >
                     ${product.price}
                   </h3>
 
@@ -418,7 +477,7 @@ export default function Home() {
                         }
                         style={redButton}
                       >
-                        Eliminar
+                        <FaTrash />
                       </button>
 
                     </div>
@@ -435,7 +494,18 @@ export default function Home() {
 
         </div>
 
-        <div style={glass}>
+        <div
+          style={{
+            background:'white',
+            borderRadius:'20px',
+            padding:'20px',
+            height:'fit-content',
+            position:'sticky',
+            top:'100px',
+            boxShadow:
+              '0 10px 25px rgba(0,0,0,0.1)'
+          }}
+        >
 
           <h2>
             Carrito 🛒
@@ -452,10 +522,9 @@ export default function Home() {
             <div
               key={index}
               style={{
-                marginBottom:'15px',
-                borderBottom:
-                  '1px solid rgba(255,255,255,0.2)',
-                paddingBottom:'10px'
+                borderBottom:'1px solid #ddd',
+                paddingBottom:'10px',
+                marginBottom:'10px'
               }}
             >
 
@@ -508,37 +577,36 @@ export default function Home() {
   )
 }
 
-const glass = {
-  background:'rgba(255,255,255,0.1)',
-  backdropFilter:'blur(12px)',
+const adminBox = {
+  background:'white',
   padding:'20px',
-  borderRadius:'25px'
+  borderRadius:'20px',
+  boxShadow:'0 10px 25px rgba(0,0,0,0.1)'
 }
 
 const input = {
   width:'100%',
   padding:'14px',
-  borderRadius:'12px',
-  border:'none',
   marginBottom:'10px',
-  fontSize:'16px'
+  borderRadius:'10px',
+  border:'1px solid #ddd'
 }
 
 const button = {
   width:'100%',
   padding:'14px',
-  borderRadius:'14px',
+  borderRadius:'12px',
   border:'none',
   background:'#2563eb',
   color:'white',
-  fontSize:'16px',
-  cursor:'pointer'
+  cursor:'pointer',
+  fontSize:'16px'
 }
 
 const soldButton = {
   width:'100%',
   padding:'14px',
-  borderRadius:'14px',
+  borderRadius:'12px',
   border:'none',
   background:'red',
   color:'white'

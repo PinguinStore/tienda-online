@@ -9,6 +9,8 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([])
   const [cart, setCart] = useState<any[]>([])
 
+  const [search, setSearch] = useState('')
+
   const [admin, setAdmin] = useState(false)
 
   const [user, setUser] = useState('')
@@ -19,9 +21,6 @@ export default function Home() {
   const [category, setCategory] = useState('')
   const [image, setImage] = useState('')
 
-  const ADMIN_USER = 'Aldair'
-  const ADMIN_PASS = '30012022'
-
   useEffect(() => {
     getProducts()
   }, [])
@@ -31,34 +30,21 @@ export default function Home() {
     const { data } = await supabase
       .from('products')
       .select('*')
-      .order('id', { ascending: false })
+      .order('id', { ascending:false })
 
     if(data) {
       setProducts(data)
     }
   }
 
-  function addToCart(product:any) {
-    setCart([...cart, product])
-  }
-
-  function removeFromCart(index:number) {
-
-    const newCart = [...cart]
-
-    newCart.splice(index, 1)
-
-    setCart(newCart)
-  }
-
   function loginAdmin() {
 
     if(
-      user === ADMIN_USER &&
-      pass === ADMIN_PASS
+      user === 'Aldair' &&
+      pass === '30012022'
     ) {
       setAdmin(true)
-      alert('Bienvenido administrador')
+      alert('Bienvenido')
     }
     else {
       alert('Datos incorrectos')
@@ -67,17 +53,7 @@ export default function Home() {
 
   async function addProduct() {
 
-    if(
-      !name ||
-      !price ||
-      !category ||
-      !image
-    ) {
-      alert('Completa todos los campos')
-      return
-    }
-
-    await supabase
+    const { error } = await supabase
       .from('products')
       .insert([
         {
@@ -85,9 +61,14 @@ export default function Home() {
           price,
           category,
           image,
-          sold: false
+          sold:false
         }
       ])
+
+    if(error) {
+      alert(error.message)
+      return
+    }
 
     setName('')
     setPrice('')
@@ -122,20 +103,28 @@ export default function Home() {
     getProducts()
   }
 
+  function addToCart(product:any) {
+    setCart([...cart, product])
+  }
+
+  function removeFromCart(index:number) {
+
+    const updated = [...cart]
+
+    updated.splice(index,1)
+
+    setCart(updated)
+  }
+
   function sendWhatsApp() {
 
-    if(cart.length === 0) {
-      alert('Carrito vacío')
-      return
-    }
-
     const text = cart.map(
-      (item, index) =>
-      `${index + 1}. ${item.name} - $${item.price}`
+      (item,index)=>
+      `${index+1}. ${item.name} - $${item.price}`
     ).join('%0A')
 
     const total = cart.reduce(
-      (acc, item) =>
+      (acc,item)=>
       acc + Number(item.price),
       0
     )
@@ -144,20 +133,28 @@ export default function Home() {
 
     const url =
       `https://wa.me/${phone}?text=` +
-      `Hola,%20quiero%20comprar:%0A${text}%0A%0ATotal:%20$${total}`
+      `Hola quiero comprar:%0A${text}%0A%0ATotal:$${total}`
 
-    window.open(url, '_blank')
+    window.open(url,'_blank')
   }
+
+  const filteredProducts =
+    products.filter((product)=>
+      product.name
+      .toLowerCase()
+      .includes(search.toLowerCase())
+    )
 
   return (
 
     <main
       style={{
         background:
-          'linear-gradient(to bottom,#f5f7fa,#e4ecf5)',
-        minHeight: '100vh',
-        padding: '20px',
-        fontFamily: 'Arial'
+          'linear-gradient(135deg,#0f172a,#1e293b)',
+        minHeight:'100vh',
+        color:'white',
+        padding:'20px',
+        fontFamily:'Arial'
       }}
     >
 
@@ -166,9 +163,9 @@ export default function Home() {
           display:'flex',
           justifyContent:'space-between',
           alignItems:'center',
-          marginBottom:'30px',
           flexWrap:'wrap',
-          gap:'20px'
+          gap:'20px',
+          marginBottom:'30px'
         }}
       >
 
@@ -176,7 +173,7 @@ export default function Home() {
 
           <h1
             style={{
-              fontSize:'42px',
+              fontSize:'50px',
               fontWeight:'bold'
             }}
           >
@@ -184,26 +181,46 @@ export default function Home() {
           </h1>
 
           <p>
-            Tienda online moderna 🚀
+            Tienda moderna premium 🚀
           </p>
 
         </div>
 
-        <div
+        <input
+          placeholder='Buscar productos...'
+          value={search}
+          onChange={(e)=>
+            setSearch(e.target.value)
+          }
           style={{
-            background:'white',
             padding:'15px',
-            borderRadius:'20px',
-            minWidth:'280px',
-            boxShadow:'0 4px 15px rgba(0,0,0,0.1)'
+            borderRadius:'15px',
+            border:'none',
+            width:'300px',
+            fontSize:'16px'
           }}
-        >
+        />
 
-          {!admin ? (
+      </div>
 
-            <>
+      <div
+        style={{
+          display:'grid',
+          gridTemplateColumns:
+            '1fr 320px',
+          gap:'20px'
+        }}
+      >
 
-              <h3>Administrador</h3>
+        <div>
+
+          {!admin && (
+
+            <div style={glass}>
+
+              <h2>
+                Acceso Administrador
+              </h2>
 
               <input
                 placeholder='Usuario'
@@ -211,7 +228,7 @@ export default function Home() {
                 onChange={(e)=>
                   setUser(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <input
@@ -221,25 +238,27 @@ export default function Home() {
                 onChange={(e)=>
                   setPass(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <button
                 onClick={loginAdmin}
-                style={blackButton}
+                style={button}
               >
-                Ingresar
+                Entrar
               </button>
 
-            </>
+            </div>
 
-          ) : (
+          )}
 
-            <>
+          {admin && (
 
-              <h3>
+            <div style={glass}>
+
+              <h2>
                 Panel Administrador
-              </h3>
+              </h2>
 
               <input
                 placeholder='Nombre'
@@ -247,7 +266,7 @@ export default function Home() {
                 onChange={(e)=>
                   setName(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <input
@@ -256,7 +275,7 @@ export default function Home() {
                 onChange={(e)=>
                   setPrice(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <input
@@ -265,7 +284,7 @@ export default function Home() {
                 onChange={(e)=>
                   setCategory(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <input
@@ -274,171 +293,149 @@ export default function Home() {
                 onChange={(e)=>
                   setImage(e.target.value)
                 }
-                style={inputStyle}
+                style={input}
               />
 
               <button
                 onClick={addProduct}
-                style={blackButton}
+                style={button}
               >
                 Añadir Producto
               </button>
 
-            </>
+            </div>
 
           )}
 
-        </div>
+          <div
+            style={{
+              display:'grid',
+              gridTemplateColumns:
+                'repeat(auto-fit,minmax(260px,1fr))',
+              gap:'20px',
+              marginTop:'20px'
+            }}
+          >
 
-      </div>
+            {filteredProducts.map((product)=>(
 
-      <div
-        style={{
-          display:'grid',
-          gridTemplateColumns:
-            '3fr 1fr',
-          gap:'20px'
-        }}
-      >
-
-        <div
-          style={{
-            display:'grid',
-            gridTemplateColumns:
-              'repeat(auto-fit,minmax(250px,1fr))',
-            gap:'20px'
-          }}
-        >
-
-          {products.map((product)=>(
-
-            <motion.div
-              whileHover={{
-                scale:1.03
-              }}
-              key={product.id}
-              style={{
-                background:'white',
-                borderRadius:'25px',
-                overflow:'hidden',
-                boxShadow:
-                  '0 6px 20px rgba(0,0,0,0.1)'
-              }}
-            >
-
-              <img
-                src={product.image}
-                style={{
-                  width:'100%',
-                  height:'240px',
-                  objectFit:'cover'
+              <motion.div
+                whileHover={{
+                  y:-10,
+                  scale:1.03
                 }}
-              />
-
-              <div
+                transition={{
+                  duration:0.2
+                }}
+                key={product.id}
                 style={{
-                  padding:'20px'
+                  background:'white',
+                  borderRadius:'25px',
+                  overflow:'hidden',
+                  color:'black',
+                  boxShadow:
+                    '0 10px 30px rgba(0,0,0,0.3)'
                 }}
               >
 
-                <p
+                <img
+                  src={product.image}
                   style={{
-                    color:'gray'
+                    width:'100%',
+                    height:'230px',
+                    objectFit:'cover'
+                  }}
+                />
+
+                <div
+                  style={{
+                    padding:'20px'
                   }}
                 >
-                  {product.category}
-                </p>
 
-                <h2>
-                  {product.name}
-                </h2>
-
-                <h3>
-                  ${product.price}
-                </h3>
-
-                {product.sold ? (
-
-                  <button
+                  <p
                     style={{
-                      ...redButton,
-                      width:'100%'
+                      color:'gray'
                     }}
                   >
-                    VENDIDO
-                  </button>
+                    {product.category}
+                  </p>
 
-                ) : (
+                  <h2>
+                    {product.name}
+                  </h2>
 
-                  <button
-                    onClick={()=>
-                      addToCart(product)
-                    }
-                    style={{
-                      ...blackButton,
-                      width:'100%'
-                    }}
-                  >
-                    Añadir al carrito
-                  </button>
+                  <h3>
+                    ${product.price}
+                  </h3>
 
-                )}
-
-                {admin && (
-
-                  <div
-                    style={{
-                      display:'flex',
-                      gap:'10px',
-                      marginTop:'10px'
-                    }}
-                  >
+                  {!product.sold ? (
 
                     <button
                       onClick={()=>
-                        toggleSold(
-                          product.id,
-                          product.sold
-                        )
+                        addToCart(product)
                       }
-                      style={yellowButton}
+                      style={button}
                     >
-                      Estado
+                      Añadir al carrito
                     </button>
+
+                  ) : (
 
                     <button
-                      onClick={()=>
-                        deleteProduct(product.id)
-                      }
-                      style={redButton}
+                      style={soldButton}
                     >
-                      Eliminar
+                      VENDIDO
                     </button>
 
-                  </div>
+                  )}
 
-                )}
+                  {admin && (
 
-              </div>
+                    <div
+                      style={{
+                        display:'flex',
+                        gap:'10px',
+                        marginTop:'10px'
+                      }}
+                    >
 
-            </motion.div>
+                      <button
+                        onClick={()=>
+                          toggleSold(
+                            product.id,
+                            product.sold
+                          )
+                        }
+                        style={yellowButton}
+                      >
+                        Estado
+                      </button>
 
-          ))}
+                      <button
+                        onClick={()=>
+                          deleteProduct(product.id)
+                        }
+                        style={redButton}
+                      >
+                        Eliminar
+                      </button>
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </motion.div>
+
+            ))}
+
+          </div>
 
         </div>
 
-        <div
-          style={{
-            background:'white',
-            padding:'20px',
-            borderRadius:'25px',
-            height:'fit-content',
-            position:'sticky',
-            top:'20px',
-            boxShadow:
-              '0 4px 20px rgba(0,0,0,0.1)'
-          }}
-        >
+        <div style={glass}>
 
           <h2>
             Carrito 🛒
@@ -455,9 +452,9 @@ export default function Home() {
             <div
               key={index}
               style={{
+                marginBottom:'15px',
                 borderBottom:
-                  '1px solid #ddd',
-                marginBottom:'10px',
+                  '1px solid rgba(255,255,255,0.2)',
                 paddingBottom:'10px'
               }}
             >
@@ -495,14 +492,9 @@ export default function Home() {
           <button
             onClick={sendWhatsApp}
             style={{
+              ...button,
               background:'#25D366',
-              color:'white',
-              border:'none',
-              width:'100%',
-              padding:'15px',
-              borderRadius:'15px',
-              fontSize:'18px',
-              cursor:'pointer'
+              marginTop:'20px'
             }}
           >
             Pedir por WhatsApp
@@ -516,21 +508,40 @@ export default function Home() {
   )
 }
 
-const inputStyle = {
-  width:'100%',
-  padding:'12px',
-  marginBottom:'10px',
-  borderRadius:'12px',
-  border:'1px solid #ddd'
+const glass = {
+  background:'rgba(255,255,255,0.1)',
+  backdropFilter:'blur(12px)',
+  padding:'20px',
+  borderRadius:'25px'
 }
 
-const blackButton = {
-  background:'black',
-  color:'white',
-  border:'none',
-  padding:'12px',
+const input = {
+  width:'100%',
+  padding:'14px',
   borderRadius:'12px',
+  border:'none',
+  marginBottom:'10px',
+  fontSize:'16px'
+}
+
+const button = {
+  width:'100%',
+  padding:'14px',
+  borderRadius:'14px',
+  border:'none',
+  background:'#2563eb',
+  color:'white',
+  fontSize:'16px',
   cursor:'pointer'
+}
+
+const soldButton = {
+  width:'100%',
+  padding:'14px',
+  borderRadius:'14px',
+  border:'none',
+  background:'red',
+  color:'white'
 }
 
 const redButton = {
@@ -543,7 +554,7 @@ const redButton = {
 }
 
 const yellowButton = {
-  background:'#f4b400',
+  background:'#f59e0b',
   color:'white',
   border:'none',
   padding:'10px',

@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../src/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { motion } from 'framer-motion'
 import {
   FaShoppingCart,
   FaTrash,
-  FaUserShield
+  FaUserShield,
+  FaMapMarkerAlt,
+  FaWhatsapp
 } from 'react-icons/fa'
 
 export default function Home() {
@@ -25,6 +27,10 @@ export default function Home() {
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('')
   const [image, setImage] = useState('')
+  const [description, setDescription] = useState('')
+  const [location, setLocation] = useState('')
+
+  const [department, setDepartment] = useState('La Paz')
 
   useEffect(() => {
     getProducts()
@@ -52,7 +58,7 @@ export default function Home() {
       alert('Bienvenido administrador')
     }
     else {
-      alert('Usuario incorrecto')
+      alert('Datos incorrectos')
     }
   }
 
@@ -66,6 +72,8 @@ export default function Home() {
           price,
           category,
           image,
+          description,
+          location,
           sold:false
         }
       ])
@@ -79,6 +87,8 @@ export default function Home() {
     setPrice('')
     setCategory('')
     setImage('')
+    setDescription('')
+    setLocation('')
 
     getProducts()
   }
@@ -93,10 +103,7 @@ export default function Home() {
     getProducts()
   }
 
-  async function toggleSold(
-    id:number,
-    sold:boolean
-  ) {
+  async function toggleSold(id:number,sold:boolean) {
 
     await supabase
       .from('products')
@@ -125,8 +132,10 @@ export default function Home() {
 
     const text = cart.map(
       (item,index)=>
-      `${index+1}. ${item.name} - $${item.price}`
-    ).join('%0A')
+        `${index+1}. ${item.name}
+Precio: Bs. ${item.price}
+Ubicación: ${item.location}`
+    ).join('%0A%0A')
 
     const total = cart.reduce(
       (acc,item)=>
@@ -134,11 +143,11 @@ export default function Home() {
       0
     )
 
-    const phone = '59170000000'
+    const phone = '59169580486'
 
     const url =
       `https://wa.me/${phone}?text=` +
-      `Hola,%20quiero%20comprar:%0A${text}%0A%0ATotal:%20$${total}`
+      `Hola,%20quiero%20comprar:%0A%0A${text}%0A%0ADepartamento%20de%20entrega:%20${department}%0A%0ATotal:%20Bs.${total}`
 
     window.open(url,'_blank')
   }
@@ -154,7 +163,7 @@ export default function Home() {
 
     <main
       style={{
-        background:'#f3f4f6',
+        background:'#f1f5f9',
         minHeight:'100vh',
         fontFamily:'Arial'
       }}
@@ -162,7 +171,7 @@ export default function Home() {
 
       <header
         style={{
-          background:'#131921',
+          background:'#0f172a',
           padding:'15px 30px',
           color:'white',
           display:'flex',
@@ -180,20 +189,37 @@ export default function Home() {
           style={{
             display:'flex',
             alignItems:'center',
-            gap:'10px'
+            gap:'15px'
           }}
         >
 
           <img
             src='https://cdn-icons-png.flaticon.com/512/3081/3081559.png'
             style={{
-              width:'50px'
+              width:'55px'
             }}
           />
 
-          <h1>
-            ALDAIR STORE
-          </h1>
+          <div>
+
+            <h1
+              style={{
+                margin:0
+              }}
+            >
+              ALDAIR STORE
+            </h1>
+
+            <p
+              style={{
+                margin:0,
+                color:'#cbd5e1'
+              }}
+            >
+              Tienda online Bolivia
+            </p>
+
+          </div>
 
         </div>
 
@@ -204,11 +230,12 @@ export default function Home() {
             setSearch(e.target.value)
           }
           style={{
-            width:'400px',
+            width:'450px',
             maxWidth:'100%',
-            padding:'14px',
-            borderRadius:'10px',
-            border:'none'
+            padding:'15px',
+            borderRadius:'14px',
+            border:'none',
+            outline:'none'
           }}
         />
 
@@ -216,15 +243,14 @@ export default function Home() {
           style={{
             display:'flex',
             alignItems:'center',
-            gap:'15px'
+            gap:'10px',
+            fontSize:'20px'
           }}
         >
 
-          <FaShoppingCart size={30} />
+          <FaShoppingCart />
 
-          <span>
-            {cart.length}
-          </span>
+          {cart.length}
 
         </div>
 
@@ -233,23 +259,23 @@ export default function Home() {
       <section
         style={{
           background:
-            'linear-gradient(to right,#2563eb,#1e3a8a)',
-          color:'white',
-          padding:'60px 30px',
-          textAlign:'center'
+          'linear-gradient(to right,#2563eb,#7c3aed)',
+          padding:'80px 20px',
+          textAlign:'center',
+          color:'white'
         }}
       >
 
         <motion.h1
-          initial={{ opacity:0,y:-40 }}
+          initial={{ opacity:0,y:-50 }}
           animate={{ opacity:1,y:0 }}
           transition={{ duration:0.7 }}
           style={{
-            fontSize:'55px',
+            fontSize:'60px',
             marginBottom:'20px'
           }}
         >
-          Bienvenido a Aldair Store
+          Compra fácil y rápido 🚀
         </motion.h1>
 
         <p
@@ -257,7 +283,7 @@ export default function Home() {
             fontSize:'22px'
           }}
         >
-          Compra productos increíbles 🚀
+          Productos modernos para toda Bolivia
         </p>
 
       </section>
@@ -265,8 +291,7 @@ export default function Home() {
       <div
         style={{
           display:'grid',
-          gridTemplateColumns:
-            '1fr 320px',
+          gridTemplateColumns:'1fr 340px',
           gap:'20px',
           padding:'20px'
         }}
@@ -347,6 +372,24 @@ export default function Home() {
               />
 
               <input
+                placeholder='Descripción'
+                value={description}
+                onChange={(e)=>
+                  setDescription(e.target.value)
+                }
+                style={input}
+              />
+
+              <input
+                placeholder='Ubicación'
+                value={location}
+                onChange={(e)=>
+                  setLocation(e.target.value)
+                }
+                style={input}
+              />
+
+              <input
                 placeholder='URL Imagen'
                 value={image}
                 onChange={(e)=>
@@ -370,9 +413,9 @@ export default function Home() {
             style={{
               display:'grid',
               gridTemplateColumns:
-                'repeat(auto-fit,minmax(260px,1fr))',
-              gap:'20px',
-              marginTop:'20px'
+              'repeat(auto-fit,minmax(280px,1fr))',
+              gap:'25px',
+              marginTop:'25px'
             }}
           >
 
@@ -381,15 +424,15 @@ export default function Home() {
               <motion.div
                 key={product.id}
                 whileHover={{
-                  y:-8,
-                  scale:1.02
+                  scale:1.03,
+                  y:-5
                 }}
                 style={{
                   background:'white',
-                  borderRadius:'20px',
+                  borderRadius:'24px',
                   overflow:'hidden',
                   boxShadow:
-                    '0 10px 25px rgba(0,0,0,0.1)'
+                  '0 10px 30px rgba(0,0,0,0.1)'
                 }}
               >
 
@@ -397,7 +440,7 @@ export default function Home() {
                   src={product.image}
                   style={{
                     width:'100%',
-                    height:'240px',
+                    height:'260px',
                     objectFit:'cover'
                   }}
                 />
@@ -410,7 +453,7 @@ export default function Home() {
 
                   <p
                     style={{
-                      color:'gray'
+                      color:'#64748b'
                     }}
                   >
                     {product.category}
@@ -420,12 +463,38 @@ export default function Home() {
                     {product.name}
                   </h2>
 
-                  <h3
+                  <p
                     style={{
-                      color:'#2563eb'
+                      color:'#475569',
+                      minHeight:'60px'
                     }}
                   >
-                    ${product.price}
+                    {product.description}
+                  </p>
+
+                  <div
+                    style={{
+                      display:'flex',
+                      alignItems:'center',
+                      gap:'6px',
+                      color:'#2563eb',
+                      marginBottom:'10px'
+                    }}
+                  >
+
+                    <FaMapMarkerAlt />
+
+                    {product.location}
+
+                  </div>
+
+                  <h3
+                    style={{
+                      color:'#2563eb',
+                      fontSize:'28px'
+                    }}
+                  >
+                    Bs. {product.price}
                   </h3>
 
                   {!product.sold ? (
@@ -497,19 +566,39 @@ export default function Home() {
         <div
           style={{
             background:'white',
-            borderRadius:'20px',
+            borderRadius:'24px',
             padding:'20px',
             height:'fit-content',
             position:'sticky',
-            top:'100px',
+            top:'90px',
             boxShadow:
-              '0 10px 25px rgba(0,0,0,0.1)'
+            '0 10px 30px rgba(0,0,0,0.1)'
           }}
         >
 
           <h2>
             Carrito 🛒
           </h2>
+
+          <select
+            value={department}
+            onChange={(e)=>
+              setDepartment(e.target.value)
+            }
+            style={input}
+          >
+
+            <option>La Paz</option>
+            <option>Santa Cruz</option>
+            <option>Cochabamba</option>
+            <option>Oruro</option>
+            <option>Potosí</option>
+            <option>Tarija</option>
+            <option>Beni</option>
+            <option>Pando</option>
+            <option>Chuquisaca</option>
+
+          </select>
 
           {cart.length === 0 && (
             <p>
@@ -522,9 +611,9 @@ export default function Home() {
             <div
               key={index}
               style={{
-                borderBottom:'1px solid #ddd',
-                paddingBottom:'10px',
-                marginBottom:'10px'
+                borderBottom:'1px solid #e2e8f0',
+                marginBottom:'15px',
+                paddingBottom:'15px'
               }}
             >
 
@@ -533,7 +622,7 @@ export default function Home() {
               </h4>
 
               <p>
-                ${item.price}
+                Bs. {item.price}
               </p>
 
               <button
@@ -549,24 +638,29 @@ export default function Home() {
 
           ))}
 
-          <h3>
-            Total: $
+          <h2>
+            Total:
+            Bs.
             {cart.reduce(
               (acc,item)=>
               acc + Number(item.price),
               0
             )}
-          </h3>
+          </h2>
 
           <button
             onClick={sendWhatsApp}
             style={{
               ...button,
-              background:'#25D366',
+              background:'#22c55e',
               marginTop:'20px'
             }}
           >
+
+            <FaWhatsapp />
+
             Pedir por WhatsApp
+
           </button>
 
         </div>
@@ -577,43 +671,48 @@ export default function Home() {
   )
 }
 
-const adminBox = {
+const adminBox:any = {
   background:'white',
-  padding:'20px',
-  borderRadius:'20px',
-  boxShadow:'0 10px 25px rgba(0,0,0,0.1)'
+  padding:'25px',
+  borderRadius:'24px',
+  boxShadow:'0 10px 30px rgba(0,0,0,0.1)'
 }
 
-const input = {
+const input:any = {
   width:'100%',
-  padding:'14px',
-  marginBottom:'10px',
-  borderRadius:'10px',
-  border:'1px solid #ddd'
+  padding:'15px',
+  marginBottom:'12px',
+  borderRadius:'14px',
+  border:'1px solid #dbeafe',
+  outline:'none'
 }
 
-const button = {
+const button:any = {
   width:'100%',
-  padding:'14px',
-  borderRadius:'12px',
+  padding:'15px',
+  borderRadius:'14px',
   border:'none',
   background:'#2563eb',
   color:'white',
   cursor:'pointer',
-  fontSize:'16px'
+  fontSize:'16px',
+  display:'flex',
+  justifyContent:'center',
+  alignItems:'center',
+  gap:'10px'
 }
 
-const soldButton = {
+const soldButton:any = {
   width:'100%',
-  padding:'14px',
-  borderRadius:'12px',
+  padding:'15px',
+  borderRadius:'14px',
   border:'none',
-  background:'red',
+  background:'#ef4444',
   color:'white'
 }
 
-const redButton = {
-  background:'red',
+const redButton:any = {
+  background:'#ef4444',
   color:'white',
   border:'none',
   padding:'10px',
@@ -621,7 +720,7 @@ const redButton = {
   cursor:'pointer'
 }
 
-const yellowButton = {
+const yellowButton:any = {
   background:'#f59e0b',
   color:'white',
   border:'none',

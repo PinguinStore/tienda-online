@@ -207,7 +207,7 @@ Ubicación: ${item.location}`
                 margin:0
               }}
             >
-              ALDAIR STORE
+              ADRIANSTORE
             </h1>
 
             <p

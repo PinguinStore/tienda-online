@@ -43,7 +43,6 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
-
   const [cart, setCart] = useState<any[]>([])
 
   const [showModal, setShowModal] = useState(false)
@@ -64,7 +63,7 @@ export default function Home() {
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState(categories[0])
-  const [image, setImage] = useState('')
+  const [images, setImages] = useState('')
   const [description, setDescription] = useState('')
   const [stock, setStock] = useState('1')
 
@@ -109,15 +108,34 @@ export default function Home() {
 
   async function getProducts(){
 
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .order('id',{ ascending:false })
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('id',{ ascending:false })
 
-    if(data){
-      setProducts(data)
-    }
+  if(error){
+    console.log(error)
+    return
   }
+
+  if(data){
+
+    const fixedProducts = data.map((p:any)=>({
+
+      ...p,
+
+      images:
+        Array.isArray(p.images)
+          ? p.images
+          : p.image
+            ? [p.image]
+            : []
+
+    }))
+
+    setProducts(fixedProducts)
+  }
+}
 
   function playSound(){
 
@@ -230,7 +248,10 @@ export default function Home() {
           name,
           price,
           category,
-          image,
+          images: images
+  .split(',')
+  .map(img => img.trim())
+  .filter(img => img !== ''),
           description,
           stock
         })
@@ -247,7 +268,10 @@ export default function Home() {
             name,
             price,
             category,
-            image,
+            images: images
+  .split(',')
+  .map(img => img.trim())
+  .filter(img => img !== ''),
             description,
             stock
           }
@@ -268,7 +292,11 @@ export default function Home() {
     setName(product.name || '')
     setPrice(product.price || '')
     setCategory(product.category || categories[0])
-    setImage(product.image || '')
+    setImages(
+  product.images
+    ? product.images.join(',')
+    : ''
+)
     setDescription(product.description || '')
     setStock(product.stock || '1')
 
@@ -300,7 +328,7 @@ export default function Home() {
     setName('')
     setPrice('')
     setCategory(categories[0])
-    setImage('')
+    setImages('')
     setDescription('')
     setStock('1')
   }
@@ -551,10 +579,15 @@ export default function Home() {
 
             <div className='relative'>
 
-              <img
-                src={promoProduct.image}
-                className='w-full h-[320px] object-cover'
-              />
+<img
+  src={
+    Array.isArray(promoProduct.images)
+      ? promoProduct.images[0]
+      : promoProduct.image ||
+        'https://via.placeholder.com/500'
+  }
+  className='w-full h-[320px] object-cover'
+/>
 
               <div className='absolute bottom-5 left-5 bg-white text-black px-5 py-3 rounded-2xl shadow-xl'>
 
@@ -619,11 +652,19 @@ export default function Home() {
 
                 <div className='relative'>
 
-                  <img
-                    src={product.image}
-                    className='w-full h-64 object-cover'
-                  />
+                  <div className='relative'>
 
+<img
+  src={
+    Array.isArray(product.images)
+      ? product.images[0]
+      : product.image ||
+        'https://via.placeholder.com/500'
+  }
+  className='w-full h-64 object-cover'
+/>
+
+</div>
                   {hasDiscount && (
 
                     <div className='absolute top-3 left-3 bg-red-500 text-white px-4 py-2 rounded-full font-black text-xs'>
@@ -908,14 +949,12 @@ export default function Home() {
 
               </select>
 
-              <input
-                placeholder='URL Imagen'
-                value={image}
-                onChange={(e)=>
-                  setImage(e.target.value)
-                }
-                className='p-4 border rounded-2xl'
-              />
+              <textarea
+  placeholder='Pega URLs separadas por coma'
+  value={images}
+  onChange={(e)=>setImages(e.target.value)}
+  className='w-full p-4 border rounded-2xl h-28'
+/>
 
               <input
                 placeholder='Stock'

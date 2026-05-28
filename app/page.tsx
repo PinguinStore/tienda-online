@@ -581,10 +581,11 @@ export default function Home() {
 
 <img
   src={
-    Array.isArray(promoProduct.images)
+    Array.isArray(promoProduct.images) &&
+    promoProduct.images.length > 0 &&
+    promoProduct.images[0] !== ''
       ? promoProduct.images[0]
-      : promoProduct.image ||
-        'https://via.placeholder.com/500'
+      : 'https://via.placeholder.com/500'
   }
   className='w-full h-[320px] object-cover'
 />
@@ -656,10 +657,11 @@ export default function Home() {
 
 <img
   src={
-    Array.isArray(product.images)
+    Array.isArray(product.images) &&
+    product.images.length > 0 &&
+    product.images[0] !== ''
       ? product.images[0]
-      : product.image ||
-        'https://via.placeholder.com/500'
+      : 'https://via.placeholder.com/500'
   }
   className='w-full h-64 object-cover'
 />
